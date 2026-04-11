@@ -1,0 +1,6 @@
+node_modules/
+.next/
+coverage/
+.env.local
+push.log
+83ebc67fd_flowdesk-v2tar

@@ -1,0 +1,472 @@
+// FlowDesk — Prisma Schema
+// Banco: PostgreSQL
+// Preparado para multi-tenant (companyId em todas as entidades principais)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  ANALYST
+  REQUESTER
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_RESPONSE
+  RESOLVED
+  CLOSED
+  CANCELLED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ChecklistPeriodicity {
+  DAILY
+  WEEKLY
+  MONTHLY
+  ON_DEMAND
+}
+
+enum ChecklistItemType {
+  CONFORMITY    // conforme / não conforme
+  TEXT
+  NUMBER
+  DATE
+  ATTACHMENT
+}
+
+enum ChecklistExecutionStatus {
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum KnowledgeArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum HistoryActionType {
+  CREATED
+  STATUS_CHANGED
+  PRIORITY_CHANGED
+  ASSIGNEE_CHANGED
+  COMMENT_ADDED
+  ATTACHMENT_ADDED
+  SLA_UPDATED
+  RESOLVED
+  CLOSED
+  CANCELLED
+  REOPENED
+}
+
+// ============================================================
+// MULTI-TENANT BASE
+// ============================================================
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique  // ex: "acme-corp" — usado em URLs futuras
+  logoUrl   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  units    Unit[]
+  sectors  Sector[]
+  users    User[]
+  tickets  Ticket[]
+  checklistTemplates ChecklistTemplate[]
+  knowledgeArticles  KnowledgeArticle[]
+
+  @@index([slug])
+}
+
+// ============================================================
+// ORGANIZAÇÃO
+// ============================================================
+
+model Unit {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Multi-tenant
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Relations
+  users               User[]
+  tickets             Ticket[]
+  checklistTemplates  ChecklistTemplate[]
+  checklistExecutions ChecklistExecution[]
+
+  @@index([companyId])
+}
+
+model Sector {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Multi-tenant
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Relations
+  users               User[]
+  tickets             Ticket[]
+  checklistTemplates  ChecklistTemplate[]
+
+  @@index([companyId])
+}
+
+// ============================================================
+// USUÁRIOS E AUTENTICAÇÃO (NextAuth compatible)
+// ============================================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // hash bcrypt (para credentials provider)
+  role          UserRole  @default(REQUESTER)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Multi-tenant
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Organização
+  unitId   String?
+  unit     Unit?   @relation(fields: [unitId], references: [id])
+  sectorId String?
+  sector   Sector? @relation(fields: [sectorId], references: [id])
+
+  // NextAuth relations
+  accounts Account[]
+  sessions Session[]
+
+  // App relations
+  ticketsCreated    Ticket[]        @relation("TicketRequester")
+  ticketsAssigned   Ticket[]        @relation("TicketAssignee")
+  comments          TicketComment[]
+  ticketHistory     TicketHistory[]
+  checklistExecutions ChecklistExecution[]
+  knowledgeArticles   KnowledgeArticle[]
+
+  @@index([companyId])
+  @@index([email])
+}
+
+// NextAuth — Account (OAuth providers)
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+// NextAuth — Session
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// NextAuth — VerificationToken (magic link / email verify)
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ============================================================
+// CHAMADOS (TICKETS)
+// ============================================================
+
+model Ticket {
+  id          String         @id @default(cuid())
+  title       String
+  description String         @db.Text
+  status      TicketStatus   @default(OPEN)
+  priority    TicketPriority @default(MEDIUM)
+  category    String?
+
+  // SLA
+  slaDueAt    DateTime?      // prazo SLA calculado na criação
+  resolvedAt  DateTime?      // quando foi marcado como RESOLVED
+  closedAt    DateTime?      // quando foi marcado como CLOSED
+  slaBreached Boolean        @default(false) // flag calculada
+
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // Multi-tenant
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Organização
+  unitId   String?
+  unit     Unit?   @relation(fields: [unitId], references: [id])
+  sectorId String?
+  sector   Sector? @relation(fields: [sectorId], references: [id])
+
+  // Pessoas
+  requesterId String
+  requester   User   @relation("TicketRequester", fields: [requesterId], references: [id])
+  assigneeId  String?
+  assignee    User?  @relation("TicketAssignee", fields: [assigneeId], references: [id])
+
+  // Origem (se gerado por não conformidade de checklist)
+  sourceChecklistExecutionItemId String?
+  sourceChecklistExecutionItem   ChecklistExecutionItem? @relation(fields: [sourceChecklistExecutionItemId], references: [id])
+
+  // Relations
+  comments    TicketComment[]
+  attachments TicketAttachment[]
+  history     TicketHistory[]
+
+  @@index([companyId])
+  @@index([status])
+  @@index([priority])
+  @@index([assigneeId])
+  @@index([requesterId])
+  @@index([sectorId])
+  @@index([unitId])
+  @@index([createdAt])
+  @@index([slaDueAt])
+}
+
+model TicketComment {
+  id         String   @id @default(cuid())
+  content    String   @db.Text
+  isInternal Boolean  @default(false) // comentário interno — visível só para staff
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  ticketId String
+  ticket   Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  @@index([ticketId])
+}
+
+model TicketAttachment {
+  id           String   @id @default(cuid())
+  fileName     String
+  fileUrl      String   // URL do storage (S3, Uploadthing, etc.)
+  fileSize     Int?     // bytes
+  mimeType     String?
+  uploadedAt   DateTime @default(now())
+
+  ticketId String
+  ticket   Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+}
+
+model TicketHistory {
+  id         String            @id @default(cuid())
+  action     HistoryActionType
+  fromValue  String?           // valor anterior (ex: status anterior)
+  toValue    String?           // valor novo
+  note       String?           // nota livre opcional
+  createdAt  DateTime          @default(now())
+
+  ticketId String
+  ticket   Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  actorId String
+  actor   User   @relation(fields: [actorId], references: [id])
+
+  @@index([ticketId])
+  @@index([createdAt])
+}
+
+// ============================================================
+// CHECKLISTS
+// ============================================================
+
+model ChecklistTemplate {
+  id           String               @id @default(cuid())
+  name         String
+  description  String?              @db.Text
+  periodicity  ChecklistPeriodicity @default(DAILY)
+  isActive     Boolean              @default(true)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  // Multi-tenant
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Organização
+  unitId   String?
+  unit     Unit?   @relation(fields: [unitId], references: [id])
+  sectorId String?
+  sector   Sector? @relation(fields: [sectorId], references: [id])
+
+  // Relations
+  items      ChecklistTemplateItem[]
+  executions ChecklistExecution[]
+
+  @@index([companyId])
+  @@index([sectorId])
+  @@index([unitId])
+}
+
+model ChecklistTemplateItem {
+  id           String            @id @default(cuid())
+  title        String
+  description  String?
+  type         ChecklistItemType @default(CONFORMITY)
+  order        Int               @default(0)
+  isRequired   Boolean           @default(true)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  templateId String
+  template   ChecklistTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  // Respostas nos executions
+  executionItems ChecklistExecutionItem[]
+
+  @@index([templateId])
+}
+
+model ChecklistExecution {
+  id          String                   @id @default(cuid())
+  status      ChecklistExecutionStatus @default(IN_PROGRESS)
+  notes       String?                  @db.Text
+  startedAt   DateTime                 @default(now())
+  completedAt DateTime?
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+
+  // Multi-tenant (denormalizado para queries mais simples)
+  companyId String
+
+  templateId String
+  template   ChecklistTemplate @relation(fields: [templateId], references: [id])
+
+  executedById String
+  executedBy   User   @relation(fields: [executedById], references: [id])
+
+  unitId String?
+  unit   Unit?  @relation(fields: [unitId], references: [id])
+
+  // Relations
+  items ChecklistExecutionItem[]
+
+  @@index([companyId])
+  @@index([templateId])
+  @@index([executedById])
+  @@index([startedAt])
+}
+
+model ChecklistExecutionItem {
+  id              String    @id @default(cuid())
+  isConform       Boolean?  // para tipo CONFORMITY
+  textValue       String?   // para tipo TEXT
+  numberValue     Float?    // para tipo NUMBER
+  dateValue       DateTime? // para tipo DATE
+  attachmentUrl   String?   // para tipo ATTACHMENT
+  observation     String?   @db.Text  // observação quando não conforme
+  isNonConformity Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  executionId String
+  execution   ChecklistExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+
+  templateItemId String
+  templateItem   ChecklistTemplateItem @relation(fields: [templateItemId], references: [id])
+
+  // Chamado gerado a partir desta não conformidade
+  generatedTickets Ticket[]
+
+  @@index([executionId])
+  @@index([isNonConformity])
+}
+
+// ============================================================
+// BASE DE CONHECIMENTO
+// ============================================================
+
+model KnowledgeArticle {
+  id          String                 @id @default(cuid())
+  title       String
+  content     String                 @db.Text
+  category    String?
+  tags        String[]               // array de tags
+  status      KnowledgeArticleStatus @default(DRAFT)
+  views       Int                    @default(0)
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  publishedAt DateTime?
+
+  // Multi-tenant
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  @@index([companyId])
+  @@index([status])
+  @@index([category])
+}
