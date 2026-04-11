@@ -46,7 +46,7 @@ Plataforma web para **gestão de chamados internos**, **checklists operacionais*
 
 ### 1) Pré-requisitos
 
-- Node.js 18+
+- Node.js 18.17+ ou 20+
 - PostgreSQL 14+
 - npm
 
