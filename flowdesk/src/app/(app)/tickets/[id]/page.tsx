@@ -5,7 +5,6 @@ import { auth } from '@/lib/auth'
 import { notFound, redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { PageHeader } from '@/components/shared/PageHeader'
-import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Calendar, User, AlertCircle } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 
