@@ -59,13 +59,23 @@ npm install
 
 ### 3) Configurar variáveis de ambiente
 
-Crie um arquivo `.env.local` em `flowdesk/` com:
+Copie o arquivo de exemplo e preencha os valores:
 
-```env
-DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/flowdesk?schema=public"
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="gere-com-openssl-rand-base64-32"
+```bash
+cp flowdesk/.env.example flowdesk/.env.local
 ```
+
+As variáveis necessárias são:
+
+| Variável | Descrição |
+|---|---|
+| `DATABASE_URL` | String de conexão com o PostgreSQL |
+| `NEXTAUTH_URL` | URL base da aplicação (ex.: `http://localhost:3000`) |
+| `NEXTAUTH_SECRET` | Secret do NextAuth — gere com `openssl rand -base64 32` |
+| `UPLOADTHING_SECRET` | Chave secreta do [Uploadthing](https://uploadthing.com) (upload de anexos) |
+| `UPLOADTHING_APP_ID` | ID do app no Uploadthing |
+
+> Variáveis opcionais (ex.: `RESEND_API_KEY` para notificações por e-mail) estão documentadas no próprio `flowdesk/.env.example`.
 
 ### 4) Banco de dados
 
