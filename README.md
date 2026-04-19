@@ -14,10 +14,21 @@ Plataforma web para **gestão de chamados internos**, **checklists operacionais*
 - **Gestão de usuários e perfis (RBAC)**.
 - **Configurações** de empresa, setores, unidades e regras de SLA.
 
+## 🖼️ Screenshots para apresentação
+
+### Dashboard executivo
+
+![Dashboard executivo do FlowDesk](assets/readme/flowdesk-dashboard-overview.svg)
+
+### Operação de tickets e SLA
+
+![Board operacional de tickets e SLA do FlowDesk](assets/readme/flowdesk-ticket-sla-board.svg)
+
 ## 🧱 Stack técnica
 
-- **Frontend/Backend**: Next.js 14 (App Router)
+- **Frontend/Backend**: Next.js 16 (App Router)
 - **Linguagem**: TypeScript
+- **UI runtime**: React 19
 - **Banco**: PostgreSQL
 - **ORM**: Prisma
 - **Autenticação**: NextAuth

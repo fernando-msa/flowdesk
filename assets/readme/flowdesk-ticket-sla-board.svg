@@ -1,0 +1,47 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#121212"/>
+      <stop offset="1" stop-color="#2B1E12"/>
+    </linearGradient>
+    <linearGradient id="warm" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#F59E0B"/>
+      <stop offset="1" stop-color="#F97316"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg2)"/>
+  <rect x="90" y="70" width="1420" height="760" rx="24" fill="#1A1A1A" stroke="#4B3A24"/>
+  <text x="130" y="120" fill="#FED7AA" font-size="28" font-family="Segoe UI, Arial, sans-serif" font-weight="700">FlowDesk - Operacao de Tickets e SLA</text>
+  <text x="130" y="155" fill="#FDBA74" font-size="17" font-family="Segoe UI, Arial, sans-serif">Pipeline visual da solicitacao ate a resolucao com controles de prazo e risco</text>
+
+  <rect x="130" y="210" width="310" height="560" rx="18" fill="#241E17" stroke="#5D482D"/>
+  <text x="165" y="252" fill="#FFE4C7" font-size="20" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Novos</text>
+  <rect x="165" y="286" width="240" height="88" rx="14" fill="#2D251C"/>
+  <text x="185" y="322" fill="#FFF7ED" font-size="16" font-family="Segoe UI, Arial, sans-serif">#4338 Falha no ponto</text>
+  <text x="185" y="347" fill="#FDBA74" font-size="13" font-family="Segoe UI, Arial, sans-serif">Prioridade Alta</text>
+  <rect x="165" y="392" width="240" height="88" rx="14" fill="#2D251C"/>
+  <text x="185" y="428" fill="#FFF7ED" font-size="16" font-family="Segoe UI, Arial, sans-serif">#4332 Impressora parada</text>
+
+  <rect x="470" y="210" width="310" height="560" rx="18" fill="#241E17" stroke="#5D482D"/>
+  <text x="505" y="252" fill="#FFE4C7" font-size="20" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Em atendimento</text>
+  <rect x="505" y="286" width="240" height="88" rx="14" fill="#2D251C"/>
+  <text x="525" y="322" fill="#FFF7ED" font-size="16" font-family="Segoe UI, Arial, sans-serif">#4312 Integracao ERP</text>
+  <rect x="505" y="392" width="240" height="88" rx="14" fill="#2D251C"/>
+  <text x="525" y="428" fill="#FFF7ED" font-size="16" font-family="Segoe UI, Arial, sans-serif">#4308 Rede intermitente</text>
+
+  <rect x="810" y="210" width="310" height="560" rx="18" fill="#241E17" stroke="#5D482D"/>
+  <text x="845" y="252" fill="#FFE4C7" font-size="20" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Aguardando</text>
+  <rect x="845" y="286" width="240" height="88" rx="14" fill="#2D251C"/>
+  <text x="865" y="322" fill="#FFF7ED" font-size="16" font-family="Segoe UI, Arial, sans-serif">#4291 Aprovacao gestor</text>
+
+  <rect x="1150" y="210" width="310" height="560" rx="18" fill="#241E17" stroke="#5D482D"/>
+  <text x="1185" y="252" fill="#FFE4C7" font-size="20" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Resolvidos</text>
+  <rect x="1185" y="286" width="240" height="88" rx="14" fill="#2D251C"/>
+  <text x="1205" y="322" fill="#FFF7ED" font-size="16" font-family="Segoe UI, Arial, sans-serif">#4282 Backup restaurado</text>
+
+  <rect x="1140" y="90" width="320" height="90" rx="14" fill="#2E2419" stroke="#7C5B34"/>
+  <text x="1170" y="128" fill="#FED7AA" font-size="16" font-family="Segoe UI, Arial, sans-serif">SLA em risco: 3 tickets</text>
+  <rect x="1170" y="142" width="250" height="12" rx="6" fill="#3F2E1D"/>
+  <rect x="1170" y="142" width="180" height="12" rx="6" fill="url(#warm)"/>
+</svg>
