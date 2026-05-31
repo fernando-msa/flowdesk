@@ -2,6 +2,13 @@
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
+import { handleApiError } from '@/lib/api-errors'
+
+const UpdateProfileSchema = z.object({
+  name: z.string().min(2, 'Nome deve ter ao menos 2 caracteres').max(200),
+  image: z.string().url().optional().nullable().or(z.literal('')),
+})
 
 export async function PUT(req: Request) {
   try {
@@ -10,33 +17,24 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
     }
 
-    const body = await req.json()
-    const { name, image } = body
-
-    if (!name || typeof name !== 'string') {
-      return NextResponse.json({ error: 'Nome inválido' }, { status: 400 })
-    }
+    const body = UpdateProfileSchema.parse(await req.json())
 
     const updated = await prisma.user.update({
       where: { id: session.user.id },
       data: {
-        name: name.trim(),
-         image: image && image.trim() !== '' ? image : null,
+        name: body.name.trim(),
+        image: body.image && body.image.trim() !== '' ? body.image : null,
       },
       select: {
         id: true,
         name: true,
         email: true,
-         image: true,
+        image: true,
       },
     })
 
     return NextResponse.json(updated)
   } catch (error) {
-    console.error('[profile] Error:', error)
-    return NextResponse.json(
-      { error: 'Erro ao atualizar perfil' },
-      { status: 500 }
-    )
+    return handleApiError(error)
   }
 }

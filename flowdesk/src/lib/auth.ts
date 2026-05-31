@@ -5,6 +5,7 @@ import Credentials from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
+import { rateLimit } from '@/lib/rate-limit'
 import type { UserRole } from '@prisma/client'
 
 const LoginSchema = z.object({
@@ -16,7 +17,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 8 * 60 * 60, // 8 hours
+    updateAge: 60 * 60, // refresh every 1 hour
   },
   pages: {
     signIn: '/login',
@@ -67,6 +69,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!parsed.success) return null
 
         const { email, password } = parsed.data
+
+        // Rate limit: 5 attempts per email per 15 minutes
+        if (!rateLimit(`login:${email}`, 5, 15 * 60 * 1000)) return null
 
         const user = await prisma.user.findUnique({
           where: { email },

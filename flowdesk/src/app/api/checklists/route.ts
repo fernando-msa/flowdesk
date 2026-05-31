@@ -5,6 +5,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { isAnalystOrAbove } from '@/lib/permissions'
 import { CreateChecklistTemplateSchema } from '@/lib/validations/checklist'
+import { handleApiError } from '@/lib/api-errors'
 
 export async function GET(_req: NextRequest) {
   try {
@@ -23,8 +24,7 @@ export async function GET(_req: NextRequest) {
 
     return NextResponse.json({ data: templates })
   } catch (error) {
-    console.error('[GET /api/checklists]', error)
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    return handleApiError(error)
   }
 }
 
@@ -60,7 +60,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ data: template }, { status: 201 })
   } catch (error) {
-    console.error('[POST /api/checklists]', error)
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    return handleApiError(error)
   }
 }

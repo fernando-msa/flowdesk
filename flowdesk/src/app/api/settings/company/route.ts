@@ -4,12 +4,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { isManagerOrAbove, isAdmin } from '@/lib/permissions'
-import { z } from 'zod'
-
-const UpdateCompanySchema = z.object({
-  name:    z.string().min(2, 'Nome obrigatório').max(200),
-  logoUrl: z.string().url().optional().nullable(),
-})
+import { UpdateCompanySchema } from '@/lib/validations/settings'
+import { handleApiError } from '@/lib/api-errors'
 
 export async function GET() {
   try {
@@ -25,8 +21,7 @@ export async function GET() {
     if (!company) return NextResponse.json({ error: 'Empresa não encontrada' }, { status: 404 })
     return NextResponse.json({ data: company })
   } catch (error) {
-    console.error('[GET /api/settings/company]', error)
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    return handleApiError(error)
   }
 }
 
@@ -47,7 +42,6 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json({ data: updated })
   } catch (error) {
-    console.error('[PUT /api/settings/company]', error)
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    return handleApiError(error)
   }
 }

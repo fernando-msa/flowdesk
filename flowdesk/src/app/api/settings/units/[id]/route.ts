@@ -4,13 +4,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { isManagerOrAbove } from '@/lib/permissions'
-import { z } from 'zod'
-
-const UnitSchema = z.object({
-  name:        z.string().min(2).max(200),
-  description: z.string().optional(),
-  isActive:    z.boolean().optional(),
-})
+import { UnitSchema } from '@/lib/validations/settings'
+import { handleApiError } from '@/lib/api-errors'
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -27,7 +22,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     const updated = await prisma.unit.update({ where: { id: params.id }, data: input })
     return NextResponse.json({ data: updated })
   } catch (error) {
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    return handleApiError(error)
   }
 }
 
@@ -43,6 +38,6 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
     })
     return NextResponse.json({ success: true })
   } catch (error) {
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    return handleApiError(error)
   }
 }

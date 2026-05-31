@@ -4,13 +4,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { isManagerOrAbove } from '@/lib/permissions'
-import { z } from 'zod'
-
-const UnitSchema = z.object({
-  name:        z.string().min(2, 'Nome obrigatório').max(200),
-  description: z.string().optional(),
-  isActive:    z.boolean().optional().default(true),
-})
+import { UnitSchema } from '@/lib/validations/settings'
+import { handleApiError } from '@/lib/api-errors'
 
 export async function GET() {
   try {
@@ -23,8 +18,7 @@ export async function GET() {
     })
     return NextResponse.json({ data: units })
   } catch (error) {
-    console.error('[GET /api/settings/units]', error)
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    return handleApiError(error)
   }
 }
 
@@ -42,7 +36,6 @@ export async function POST(req: NextRequest) {
     })
     return NextResponse.json({ data: unit }, { status: 201 })
   } catch (error) {
-    console.error('[POST /api/settings/units]', error)
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    return handleApiError(error)
   }
 }

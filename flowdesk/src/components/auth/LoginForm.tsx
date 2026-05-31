@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { signIn } from 'next-auth/react'
@@ -12,22 +12,13 @@ import { cn } from '@/lib/utils'
 
 interface LoginFormProps {
   callbackUrl?: string
-  initialEmail?: string
-  initialPassword?: string
-  autoSubmitOnMount?: boolean
 }
 
-export function LoginForm({
-  callbackUrl = '/dashboard',
-  initialEmail = '',
-  initialPassword = '',
-  autoSubmitOnMount = false,
-}: LoginFormProps) {
+export function LoginForm({ callbackUrl = '/dashboard' }: LoginFormProps) {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const autoSubmittedRef = useRef(false)
 
   const {
     register,
@@ -35,10 +26,6 @@ export function LoginForm({
     formState: { errors },
   } = useForm<LoginInput>({
     resolver: zodResolver(LoginSchema),
-    defaultValues: {
-      email: initialEmail,
-      password: initialPassword,
-    },
   })
 
   const onSubmit = useCallback(
@@ -68,12 +55,6 @@ export function LoginForm({
     },
     [callbackUrl, router]
   )
-
-  useEffect(() => {
-    if (!autoSubmitOnMount || autoSubmittedRef.current) return
-    autoSubmittedRef.current = true
-    void handleSubmit(onSubmit)()
-  }, [autoSubmitOnMount, handleSubmit, onSubmit])
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -160,21 +141,6 @@ export function LoginForm({
         {isLoading ? 'Entrando...' : 'Entrar'}
       </button>
 
-      {/* Demo credentials */}
-      <div className="border-t pt-4">
-        <p className="text-xs text-gray-500 mb-2 font-medium">Credenciais de demonstração:</p>
-        <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
-          <div>
-            <span className="font-medium text-gray-700">Admin:</span>
-            <br />admin@flowdesk.dev
-          </div>
-          <div>
-            <span className="font-medium text-gray-700">Analista:</span>
-            <br />analista@flowdesk.dev
-          </div>
-        </div>
-        <p className="text-xs text-gray-400 mt-1">Senha padrão: [Role]@123</p>
-      </div>
     </form>
   )
 }

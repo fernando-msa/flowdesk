@@ -6,6 +6,7 @@ import { auth } from '@/lib/auth'
 import { listTickets, createNewTicket } from '@/server/services/ticket.service'
 import { CreateTicketSchema, TicketFiltersSchema } from '@/lib/validations/ticket'
 import { buildPaginationMeta } from '@/lib/utils'
+import { handleApiError } from '@/lib/api-errors'
 
 export async function GET(req: NextRequest) {
   try {
@@ -22,8 +23,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ data: tickets, meta })
   } catch (error) {
-    console.error('[GET /api/tickets]', error)
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    return handleApiError(error)
   }
 }
 
@@ -40,11 +40,7 @@ export async function POST(req: NextRequest) {
     const ticket = await createNewTicket(input, session.user)
 
     return NextResponse.json({ data: ticket }, { status: 201 })
-  } catch (error: unknown) {
-    if (error instanceof Error && error.name === 'ZodError') {
-      return NextResponse.json({ error: 'Dados inválidos', details: error.message }, { status: 422 })
-    }
-    console.error('[POST /api/tickets]', error)
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+  } catch (error) {
+    return handleApiError(error)
   }
 }

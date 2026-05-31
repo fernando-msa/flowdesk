@@ -5,6 +5,7 @@ import { auth } from '@/lib/auth'
 import { getDashboardStats } from '@/server/services/ticket.service'
 import { isAnalystOrAbove } from '@/lib/permissions'
 import { prisma } from '@/lib/prisma'
+import { handleApiError } from '@/lib/api-errors'
 
 export async function GET(req: NextRequest) {
   try {
@@ -45,7 +46,6 @@ export async function GET(req: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[GET /api/dashboard]', error)
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    return handleApiError(error)
   }
 }

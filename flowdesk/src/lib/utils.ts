@@ -2,7 +2,6 @@ import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { format, formatDistanceToNow, formatDistance } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import type { TicketPriority } from '@prisma/client'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -98,12 +97,3 @@ export function buildPaginationMeta(total: number, page: number, perPage: number
   }
 }
 
-// ── Priority / SLA ───────────────────────────────────────────
-
-/** Mapa de horas de SLA por prioridade (padrão — sobrescrito pelas configs da empresa) */
-export const DEFAULT_SLA_HOURS: Record<TicketPriority, number> = {
-  CRITICAL: 2,
-  HIGH:     8,
-  MEDIUM:   24,
-  LOW:      72,
-}

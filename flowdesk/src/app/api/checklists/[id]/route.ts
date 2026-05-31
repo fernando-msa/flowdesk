@@ -6,6 +6,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { isAnalystOrAbove, isManagerOrAbove } from '@/lib/permissions'
 import { CreateChecklistTemplateSchema } from '@/lib/validations/checklist'
+import { handleApiError } from '@/lib/api-errors'
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -30,8 +31,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
     if (!template) return NextResponse.json({ error: 'Não encontrado' }, { status: 404 })
     return NextResponse.json({ data: template })
   } catch (error) {
-    console.error('[GET /api/checklists/[id]]', error)
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    return handleApiError(error)
   }
 }
 
@@ -77,8 +77,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     return NextResponse.json({ data: updated })
   } catch (error) {
-    console.error('[PUT /api/checklists/[id]]', error)
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    return handleApiError(error)
   }
 }
 
@@ -101,7 +100,6 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('[DELETE /api/checklists/[id]]', error)
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    return handleApiError(error)
   }
 }

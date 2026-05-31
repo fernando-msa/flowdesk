@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { isManagerOrAbove, isAdmin } from '@/lib/permissions'
+import { DEFAULT_SLA } from '@/lib/validations/settings'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { SettingsTabs } from '@/components/settings/SettingsTabs'
 
@@ -34,8 +35,6 @@ export default async function SettingsPage() {
   ])
 
   if (!company) redirect('/')
-
-  const DEFAULT_SLA = { CRITICAL: 2, HIGH: 8, MEDIUM: 24, LOW: 72 }
 
   return (
     <div className="space-y-6">

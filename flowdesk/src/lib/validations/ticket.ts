@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const CreateTicketSchema = z.object({
   title: z.string().min(5, 'Título deve ter ao menos 5 caracteres').max(200),
-  description: z.string().min(10, 'Descrição deve ter ao menos 10 caracteres'),
+  description: z.string().min(10, 'Descrição deve ter ao menos 10 caracteres').max(10000),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
   category: z.string().optional(),
   unitId: z.string().optional(),
@@ -12,7 +12,7 @@ export const CreateTicketSchema = z.object({
 
 export const UpdateTicketSchema = z.object({
   title: z.string().min(5).max(200).optional(),
-  description: z.string().min(10).optional(),
+  description: z.string().min(10).max(10000).optional(),
   status: z.enum(['OPEN', 'IN_PROGRESS', 'WAITING_RESPONSE', 'RESOLVED', 'CLOSED', 'CANCELLED']).optional(),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']).optional(),
   category: z.string().optional(),

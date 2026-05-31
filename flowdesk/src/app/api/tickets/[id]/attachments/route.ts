@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { handleApiError } from '@/lib/api-errors'
 
 const AttachmentSchema = z.object({
   fileName: z.string(),
@@ -52,8 +53,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     return NextResponse.json({ data: attachments }, { status: 201 })
   } catch (error) {
-    console.error('[POST /api/tickets/[id]/attachments]', error)
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    return handleApiError(error)
   }
 }
 
@@ -75,7 +75,6 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     await prisma.ticketAttachment.delete({ where: { id: attachmentId } })
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('[DELETE /api/tickets/[id]/attachments]', error)
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    return handleApiError(error)
   }
 }

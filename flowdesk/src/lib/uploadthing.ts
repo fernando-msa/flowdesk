@@ -28,8 +28,6 @@ export const ourFileRouter = {
   })
     .middleware(authMiddleware)
     .onUploadComplete(async ({ metadata, file }) => {
-      // O handler da API persiste no banco; aqui apenas logamos
-      console.log('[uploadthing] ticketAttachment uploaded by', metadata.userId, file.url)
       return { url: file.url, name: file.name, size: file.size }
     }),
 
@@ -40,7 +38,6 @@ export const ourFileRouter = {
   })
     .middleware(authMiddleware)
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log('[uploadthing] checklistItem uploaded by', metadata.userId, file.url)
       return { url: file.url, name: file.name, size: file.size }
     }),
 
@@ -48,7 +45,6 @@ export const ourFileRouter = {
   companyLogo: f({ image: { maxFileSize: '4MB', maxFileCount: 1 } })
     .middleware(authMiddleware)
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log('[uploadthing] companyLogo uploaded by', metadata.userId, file.url)
       return { url: file.url }
     }),
 
@@ -56,7 +52,6 @@ export const ourFileRouter = {
   userAvatar: f({ image: { maxFileSize: '2MB', maxFileCount: 1 } })
     .middleware(authMiddleware)
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log('[uploadthing] userAvatar uploaded by', metadata.userId, file.url)
       return { url: file.url }
     }),
 } satisfies FileRouter

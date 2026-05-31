@@ -113,7 +113,7 @@ export async function createTicket(data: Prisma.TicketCreateInput) {
 
 export async function updateTicket(id: string, companyId: string, data: Prisma.TicketUpdateInput) {
   return prisma.ticket.update({
-    where: { id },
+    where: { id, companyId },
     data,
     include: {
       requester: { select: { id: true, name: true, email: true } },

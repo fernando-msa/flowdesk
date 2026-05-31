@@ -9,8 +9,6 @@ export default function LoginPage({
 }: {
   searchParams?: {
     callbackUrl?: string
-    email?: string
-    password?: string
   }
 }) {
   const rawCallbackUrl = searchParams?.callbackUrl ?? '/dashboard'
@@ -22,10 +20,6 @@ export default function LoginPage({
     !rawCallbackUrl.startsWith('/forgot-password')
       ? rawCallbackUrl
       : '/dashboard'
-  const initialEmail = searchParams?.email ?? ''
-  const initialPassword = searchParams?.password ?? ''
-  const autoSubmitOnMount =
-    process.env.NODE_ENV === 'development' && Boolean(initialEmail && initialPassword)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-950 via-brand-900 to-brand-800 flex items-center justify-center p-4">
@@ -46,12 +40,7 @@ export default function LoginPage({
         <div className="bg-white rounded-2xl shadow-2xl p-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-1">Bem-vindo de volta</h2>
           <p className="text-gray-500 text-sm mb-6">Entre com suas credenciais para continuar</p>
-          <LoginForm
-            callbackUrl={callbackUrl}
-            initialEmail={initialEmail}
-            initialPassword={initialPassword}
-            autoSubmitOnMount={autoSubmitOnMount}
-          />
+          <LoginForm callbackUrl={callbackUrl} />
         </div>
 
         <p className="text-center text-brand-400 text-xs mt-6">

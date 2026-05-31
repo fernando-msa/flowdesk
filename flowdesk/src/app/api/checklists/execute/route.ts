@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { ExecuteChecklistSchema } from '@/lib/validations/checklist'
 import { calculateSlaDueAt } from '@/lib/sla'
+import { handleApiError } from '@/lib/api-errors'
 
 export async function POST(req: NextRequest) {
   try {
@@ -75,7 +76,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ data: execution }, { status: 201 })
   } catch (error) {
-    console.error('[POST /api/checklists/execute]', error)
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    return handleApiError(error)
   }
 }

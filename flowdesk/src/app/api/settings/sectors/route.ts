@@ -4,13 +4,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { isManagerOrAbove } from '@/lib/permissions'
-import { z } from 'zod'
-
-const SectorSchema = z.object({
-  name:        z.string().min(2).max(200),
-  description: z.string().optional(),
-  isActive:    z.boolean().optional().default(true),
-})
+import { SectorSchema } from '@/lib/validations/settings'
+import { handleApiError } from '@/lib/api-errors'
 
 export async function GET() {
   try {
@@ -23,7 +18,7 @@ export async function GET() {
     })
     return NextResponse.json({ data: sectors })
   } catch (error) {
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    return handleApiError(error)
   }
 }
 
@@ -39,6 +34,6 @@ export async function POST(req: NextRequest) {
     })
     return NextResponse.json({ data: sector }, { status: 201 })
   } catch (error) {
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
+    return handleApiError(error)
   }
 }
